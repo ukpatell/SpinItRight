@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>WebGL Circle using Points</title>
+  </head>
+  <body onload="main()">
+    <canvas
+      id="webgl"
+      width="400"
+      height="400"
+      style="display: block; margin: auto"
+    ></canvas>
+    <script src="./assets/js/lib/cuon-matrix.js"></script>
+    <script src="./assets/js/lib/cuon-utils.js"></script>
+    <script src="./assets/js/lib/webgl-debug.js"></script>
+    <script src="./assets/js/lib/webgl-utils.js"></script>
+    <script>
+      // Vertex shader program
+      var VSHADER_SOURCE =
+        "attribute vec4 a_Position;\n" +
+        "attribute vec4 a_Color;\n" +
+        "uniform mat4 u_ModelMatrix;\n" +
+        "varying vec4 v_Color;\n" +
+        "void main() {\n" +
+        " gl_Position = u_ModelMatrix * a_Position;\n" +
+        " v_Color = a_Color;\n" +
+        "}\n";
+
+      // Fragment shader program
+      var FSHADER_SOURCE =
+        "#ifdef GL_ES\n" +
+        "precision mediump float;\n" +
+        "#endif \n" +
+        "varying vec4 v_Color;\n" +
+        "void main() {\n" +
+        " gl_FragColor = v_Color;\n" +
+        "}\n";
+
+      var ANGLE_STEP = 360 / 1000; // 1 second rotation
+      var g_angle = 0;
+      var direction = 1;
+      var g_last = Date.now();
+
+      var centerX = 0;
+      var centerY = 0;
+
+      function main() {
+        // Retrieve <canvas> element
+        var canvas = document.getElementById("webgl");
+
+        // Get the rendering context for WebGL
+        var gl =
+          canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        if (!gl) {
+          console.log("Failed to get the rendering context for WebGL");
+          return;
+        }
+
+        // Initialize shaders
+        if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+          console.log("Failed to initialize shaders.");
+          return;
+        }
+
+        var n = initVertexBuffers(gl);
+        if (n < 0) {
+          console.log("Failed to set the positions of the vertices");
+          return;
+        }
+
+        // Get the storage location of u_ModelMatrix
+        var u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
+        if (!u_ModelMatrix) {
+          console.log("Failed to get the storage location of u_ModelMatrix");
+          return;
+        }
+
+        var modelMatrix = new Matrix4();
+
+        document.addEventListener("keydown", function (event) {
+          if (event.code === "Space") {
+            direction = -direction;
+          }
+        });
+
+        var tick = function () {
+          g_angle = animate(g_angle);
+          draw(gl, n, modelMatrix, u_ModelMatrix);
+          requestAnimationFrame(tick);
+        };
+        tick();
+      }
+
+      function animate(angle) {
+        var now = Date.now();
+        var elapsed = now - g_last;
+        g_last = now;
+        var newAngle = angle + (ANGLE_STEP * elapsed * direction) / 7.0;
+        return (newAngle %= 360);
+      }
+
+      function draw(gl, n, modelMatrix, u_ModelMatrix) {
+        // Set the rotation matrix
+        modelMatrix.setTranslate(centerX, centerY, 0); // Add this line to translate the circle
+        modelMatrix.setRotate(g_angle, centerX, centerY, 1);
+
+        // Pass the rotation matrix to the vertex shader
+        gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+        // Specify the color for clearing <canvas>
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+        // Clear <canvas>
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // Draw the circle using points
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, n);
+        // gl.drawArrays(gl.POINTS, n - 1, 1); // Draw the falling point
+      }
+
+      function initVertexBuffers(gl) {
+        var vertices = [];
+    
+        var radius = 0.4;
+        var numPoints = 100;
+
+        vertices.push(centerX, centerY, 0.0, 0.0, 0.0); // Center point
+
+        for (let i = 0; i <= numPoints; i++) {
+          const angle = (2 * Math.PI * i) / numPoints;
+          const x = radius * Math.cos(angle) + centerX;
+          const y = radius * Math.sin(angle) + centerY;
+          if (i < 7) {
+            vertices.push(x, y, 0.0, 0.0, 0.0);
+          } else {
+            vertices.push(x, y, 0.3, 0.1, 0.5);
+          }
+        }
+
+        var n = vertices.length / 5;
+
+        // Create a buffer object
+        var vertexColorBuffer = gl.createBuffer();
+        if (!vertexColorBuffer) {
+          console.log("Failed to create the buffer object");
+          return false;
+        }
+
+        var verticesColors = new Float32Array(vertices);
+        // Bind the buffer object to target
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, verticesColors, gl.STATIC_DRAW);
+        var FSIZE = verticesColors.BYTES_PER_ELEMENT;
+
+        // Get the storage location of a_Position, assign and enable buffer
+        var a_Position = gl.getAttribLocation(gl.program, "a_Position");
+        if (a_Position < 0) {
+          console.log("Failed to get the storage location of a_Position");
+          return -1;
+        }
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, FSIZE * 5, 0);
+        gl.enableVertexAttribArray(a_Position);
+
+        // Get the storage location of a_Color, assign buffer and enable
+        var a_Color = gl.getAttribLocation(gl.program, "a_Color");
+        if (a_Color < 0) {
+          console.log("Failed to get the storage location of a_Color");
+          return -1;
+        }
+        gl.vertexAttribPointer(
+          a_Color,
+          3,
+          gl.FLOAT,
+          false,
+          FSIZE * 5,
+          FSIZE * 2
+        );
+        gl.enableVertexAttribArray(a_Color);
+
+        // Unbind the buffer object
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        return n;
+      }
+    </script>
+  </body>
+</html>

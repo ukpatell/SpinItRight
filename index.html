@@ -7,8 +7,8 @@
   <title>Spin it right</title>
   <link rel="stylesheet" href="./assets/css/index.css">
 </head>
-<body>
-  <div id="header">
+<body onload="main()">
+  <!-- <div id="header">
       <div class="score">
           <h3>Time</h3>
           <span id="time">1.0999s</span>
@@ -18,19 +18,24 @@
           <h3>Score</h3>
           <span id="points">500</span>
       </div>
-  </div>
-  <div id="play-container">
+  </div> -->
+  <canvas id="game" width="800" height="800" style="display: block; margin: 0 auto;">
+    Please use a browser that supports "canvas"
+    </canvas>
+  <!-- <div id="play-container">
     <button id="play-button"></button>
   </div>
   <div id="container" style="display: none;">
-    <canvas id="game" style="display: block; margin: 0 auto;"></canvas>
-  </div>
-  <!-- <div id="container">
-    <canvas id="game"></canvas>
+    <canvas id="game" style="display: block; margin: 0 auto;" width="200px" height="500">
+      Please use a browser that supports "canvas"
+    </canvas>
   </div> -->
   <script src="./assets/js/game.js"></script>
   <script src="./assets/js/index.js"></script>
-
+  <script src="./assets/js/lib/cuon-matrix.js"></script>
+  <script src="./assets/js/lib/cuon-utils.js"></script>
+  <script src="./assets/js/lib/webgl-debug.js"></script>
+  <script src="./assets/js/lib/webgl-utils.js"></script>
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Galindo&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Galindo&display=swap');
 
 body {
   margin: 0;
@@ -44,16 +44,16 @@ span{
   100% {
     transform: rotate(360deg);
   }
-}
+} */
 /* Spin word Spins */
-h1 span {
+/* h1 span {
   display: inline-block;
   animation: spin 2s linear;
   animation-fill-mode: forwards;
   color: lightgreen;
-}
+} */
 /* Right wourd goes right */
-@keyframes shake {
+/* @keyframes shake {
   0% {
     transform: translateX(0);
   }
@@ -69,17 +69,17 @@ h1 span {
   100% {
     transform: translateX(0);
   }
-}
+} */
 
-h1 span:last-child {
+/* h1 span:last-child {
   display: inline-block;
   animation: shake 2s linear;
   animation-fill-mode: forwards;
   color: lightskyblue;
-}
+} */
 
 /* drop time and score animation */
-@keyframes drop {
+/* @keyframes drop {
   0% {
     transform: translateY(-100%);
     opacity: 0;
@@ -94,9 +94,9 @@ h1 span:last-child {
   display: inline-block;
   animation: drop 0.5s ease;
   animation-fill-mode: forwards;
-}
+} */
 /* Play button & canas load */
-#play-container {
+/* #play-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -123,8 +123,4 @@ h1 span:last-child {
 
 #play-button::before {
   content: "\25B6";
-}
-
-
-
-
+} */
