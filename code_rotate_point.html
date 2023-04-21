@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <title>WebGL Circle using Points</title>
     <style>
+      body{background:black}
       canvas {
         display: block;
         margin: auto;
@@ -52,7 +53,7 @@
       var numPoints = 100;
 
       var fallingPoints = [];
-      var fallPointLength = 2;
+      var fallPointLength = 4;
 
       count = 0;
       // First 7 verticies where the mouth is - eat to get points
@@ -66,11 +67,12 @@
 
         for (let i = 0; i < fallPointLength; i++) {
           const x = Math.random() * 0.8 - 0.4;
-          const y = 0.2;
+          // const x = 0;
+          // const y = 0.2; 
+          const y = Math.random() * 1 + 1;
           const color = colors[Math.floor(Math.random() * colors.length)];
           fallingPoints.push({ x, y, color });
         }
-        console.log(fallingPoints);
       }
       random();
 
@@ -126,7 +128,7 @@
         var now = Date.now();
         var elapsed = now - g_last;
         g_last = now;
-        var newAngle = angle + (ANGLE_STEP * elapsed * direction) / 100.0;
+        var newAngle = angle + (ANGLE_STEP * elapsed * direction) / 10.0;
         return (newAngle %= 360);
       }
       function updateFallingPoints() {
@@ -134,36 +136,12 @@
           point.y -= 0.01;
           if (point.y < -1) {
             point.y = 1;
+            // point.x = 0;
             point.x = Math.random() * 0.8 - 0.4;
           }
         });
       }
 
-      // function draw(gl, n, modelMatrix, u_ModelMatrix) {
-      //   // Set the rotation matrix
-      //   modelMatrix.setTranslate(centerX, centerY, 0);
-      //   modelMatrix.rotate(g_angle, 0, 0, 1);
-
-      //   // Pass the rotation matrix to the vertex shader
-      //   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-
-      //   // Specify the color for clearing <canvas>
-      //   gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-      //   // Clear <canvas>
-      //   gl.clear(gl.COLOR_BUFFER_BIT);
-
-      //   // Draw the circle using points
-      //   gl.drawArrays(gl.TRIANGLE_FAN, 0, n - fallPointLength);
-
-      //   // Draw the falling points
-      //   count = 0;
-      //   fallingPoints.forEach(function (point, index) {
-      //     modelMatrix.setTranslate(point.x, point.y, 0);
-      //     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-      //     gl.drawArrays(gl.POINTS, n - fallPointLength + index, 1);
-      //   });
-      // }
       function draw(gl, n, modelMatrix, u_ModelMatrix) {
         // Set the rotation matrix
         modelMatrix.setTranslate(centerX, centerY, 0);
@@ -181,37 +159,14 @@
         // Draw the circle using points
         gl.drawArrays(gl.TRIANGLE_FAN, 0, n - fallPointLength);
 
-        // Calculate eater vertices based on the current angle
-        eaterVertices = [];
-        for (let i = 0; i < 7; i++) {
-          const angle =
-            (2 * Math.PI * i) / numPoints + (Math.PI * g_angle) / 180;
+        eaterVertices = []
+        for (let i = 1; i < 7; i++) {
+          const angle = (2 * Math.PI * i) / numPoints + (Math.PI * g_angle) / 180;
           const x = radius * Math.cos(angle) + centerX;
           const y = radius * Math.sin(angle) + centerY;
-          eaterVertices.push([x, y]);
+          eaterVertices.push({x,y});
+          // console.log(eaterVertices[0])
         }
-
-        const proximityThreshold = 0.01; // Adjust this value as needed
-
-        // Check if any falling point is close to the black eater's mouth vertices
-        eaterVertices.forEach(function (eaterVertex) {
-          const eaterX = eaterVertex[0];
-          const eaterY = eaterVertex[1];
-
-          fallingPoints.forEach(function (fallingPoint) {
-            const fallingX = fallingPoint.x;
-            const fallingY = fallingPoint.y;
-
-            const deltaX = eaterX - fallingX;
-            const deltaY = eaterY - fallingY;
-            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-            if (distance <= proximityThreshold) {
-              console.log("Collision detected between eater and falling point");
-              // Perform any desired action upon collision, e.g., remove the falling point, increase the score, etc.
-            }
-          });
-        });
 
         // Draw the falling points
         count = 0;
@@ -220,7 +175,74 @@
           gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
           gl.drawArrays(gl.POINTS, n - fallPointLength + index, 1);
         });
+        // console.log("fall : ",fallingPoints[0])
+        var differenceX = eaterVertices[0].x - fallingPoints[0].x;
+        var differenceY = eaterVertices[0].y - fallingPoints[0].y;
+        var powX = Math.pow(differenceX,2)
+        var powY = Math.pow(differenceY,2)
+        var final = powX + powY
+        var distance = Math.sqrt(final)
+        if(distance.toFixed(2) < 0.1){alert("Gotcha")}
+        console.log("Distance: ",distance.toFixed(2));
+        
       }
+      // function draw(gl, n, modelMatrix, u_ModelMatrix) {
+      //   // Set the rotation matrix
+      //   modelMatrix.setTranslate(centerX, centerY, 0);
+      //   modelMatrix.rotate(g_angle, 0, 0, 1);
+
+      //   // Pass the rotation matrix to the vertex shader
+      //   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+      //   // Specify the color for clearing <canvas>
+      //   gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+      //   // Clear <canvas>
+      //   gl.clear(gl.COLOR_BUFFER_BIT);
+
+      //   // Draw the circle using points
+      //   gl.drawArrays(gl.TRIANGLE_FAN, 0, n - fallPointLength);
+
+      //   // Calculate eater vertices based on the current angle
+      //   eaterVertices = [];
+      //   for (let i = 0; i < 7; i++) {
+      //     const angle =
+      //       (2 * Math.PI * i) / numPoints + (Math.PI * g_angle) / 180;
+      //     const x = radius * Math.cos(angle) + centerX;
+      //     const y = radius * Math.sin(angle) + centerY;
+      //     eaterVertices.push([x, y]);
+      //   }
+
+      //   const proximityThreshold = 0.01; // Adjust this value as needed
+
+      //   // Check if any falling point is close to the black eater's mouth vertices
+      //   eaterVertices.forEach(function (eaterVertex) {
+      //     const eaterX = eaterVertex[0];
+      //     const eaterY = eaterVertex[1];
+
+      //     fallingPoints.forEach(function (fallingPoint) {
+      //       const fallingX = fallingPoint.x;
+      //       const fallingY = fallingPoint.y;
+
+      //       const deltaX = eaterX - fallingX;
+      //       const deltaY = eaterY - fallingY;
+      //       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      //       if (distance <= proximityThreshold) {
+      //         console.log("Collision detected between eater and falling point");
+      //         // Perform any desired action upon collision, e.g., remove the falling point, increase the score, etc.
+      //       }
+      //     });
+      //   });
+
+      //   // Draw the falling points
+      //   count = 0;
+      //   fallingPoints.forEach(function (point, index) {
+      //     modelMatrix.setTranslate(point.x, point.y, 0);
+      //     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+      //     gl.drawArrays(gl.POINTS, n - fallPointLength + index, 1);
+      //   });
+      // }
 
       function initVertexBuffers(gl) {
         var vertices = [];
@@ -231,7 +253,10 @@
           const angle = (2 * Math.PI * i) / numPoints;
           const x = radius * Math.cos(angle) + centerX;
           const y = radius * Math.sin(angle) + centerY;
-          if (i < 7) {
+          if (i == 1 || i == 0) {
+            vertices.push(x, y, 0, 1.0, 1.0, 1.0, 1.0);
+          } 
+          else if (i > 1 && i < 20) {
             vertices.push(x, y, 0, 0.0, 0.0, 0.0, 1.0);
           } else {
             vertices.push(x, y, 0, 0.3, 0.1, 0.5, 1.0);
